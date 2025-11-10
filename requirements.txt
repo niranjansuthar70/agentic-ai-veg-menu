@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pillow
+transformers
+torch
+huggingface_hub 
+python-dotenv
+accelerate
+bitsandbytes
+torchvision
+google-generativeai
+google
