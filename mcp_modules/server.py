@@ -16,20 +16,21 @@ def sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
     print("dishes: ", dishes)
     print("type of dishes: ", type(dishes))
 
-    # for dish in dishes:
-    #     name = dish.get("name", "unknown")
+    for dish in dishes:
+        name = dish.get("name", "unknown")
 
-    #     if "price" not in dish:
-    #         return {"error": f"Dish '{name}' is missing required field 'price'."}
+        if "price" not in dish:
+            return {"error": f"Dish '{name}' is missing required field 'price'."}
 
-    #     try:
-    #         total += Decimal(str(dish["price"]))
-    #     except (InvalidOperation, TypeError):
-    #         return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
+        try:
+            total += Decimal(str(dish["price"]))
+        except (InvalidOperation, TypeError):
+            return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
 
-    # return {"total_price": float(total)}
-    return {}
+    return {"total_price": float(total)}
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    mcp.run(
+        transport="streamable-http",
+    )
