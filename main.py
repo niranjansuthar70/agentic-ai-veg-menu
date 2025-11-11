@@ -3,8 +3,46 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from typing import List, Optional, Dict, Any, Set
 import io
 from PIL import Image
+from gemini_v0.gemini_extraction import extract_veg_dishes
 
 app = FastAPI(title="Process images and return dimensions")
+
+def process_image_sync(contents: bytes) -> Dict[str, Any]:
+    """
+    This SYNCHRONOUS function now contains the conditional logic
+    based on the 'method' argument.
+    """
+    try:
+        pil_image = Image.open(io.BytesIO(contents))
+        
+        image_menu_data: Dict[str, Any] = {}
+
+        try:
+            print('extracting vegetarian dishes with gemini')
+            # This is assumed to be a blocking call
+            image_menu_data = extract_veg_dishes(pil_image)
+        except Exception as e:
+            print(f"Error extracting vegetarian dishes with gemini: {e}")
+            return {
+                "vegetarian_dishes": None,
+                "sum": None,
+                "error": f"Error extracting vegetarian dishes with gemini: {e}"
+            }
+
+        return {
+            # Use .get() for safety in case a function fails
+            "vegetarian_dishes": image_menu_data.get("vegetarian_dishes"),
+            "sum": image_menu_data.get("sum"),
+            "error": None
+        }
+    except Exception as e:
+        # Return the specific error
+        return {
+            "vegetarian_dishes": None,
+            "sum": None,
+            "error": f"Failed to process image: {str(e)}"
+        }
+
 
 @app.post("/process-images")
 async def process_images(
@@ -24,13 +62,11 @@ async def process_images(
     for image in images:
         contents = await image.read()
         
-        #--read and show image width and height
-        pil_image = Image.open(io.BytesIO(contents))
-        width, height = pil_image.size
+        #--process image with gemini
+        results=process_image_sync(contents)
         image_details.append({
             "filename": image.filename,
-            "width": width,
-            "height": height,
+            **results
         })
         
         await image.close()
