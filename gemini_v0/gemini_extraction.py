@@ -8,6 +8,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#---load gemini model from .env file
+gemini_model = os.getenv("gemini_model_id")
+print("gemini_model: ", gemini_model)
+
 def extract_veg_dishes(img: Image.Image) -> dict:
     """
     Analyzes a menu image using the Gemini API to extract vegetarian dishes.
@@ -25,7 +29,7 @@ def extract_veg_dishes(img: Image.Image) -> dict:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
     # Set up the model and prompt
-    model = genai.GenerativeModel('gemini-2.5-pro')
+    model = genai.GenerativeModel(gemini_model)
 
     prompt = """
     Analyze the provided restaurant menu image. Your task is to extract the dishes and their corresponding prices.
@@ -57,7 +61,7 @@ def extract_veg_dishes(img: Image.Image) -> dict:
     except (json.JSONDecodeError, AttributeError):
         print("Error: Failed to parse JSON from the model's response.")
         print("Raw response:", response.text)
-        raise ValueError("Could not get a valid JSON response from the AI model.")
+        return {}
 
 
 def main():
@@ -75,7 +79,6 @@ def main():
     try:
         img = Image.open(args.image_path)
         result_data = extract_veg_dishes(img)
-        # print('result_data: ', result_data)
         json_string = json.dumps(result_data, indent=2)
         #--save json to temp folder
         #--check and create temp folder if not exists

@@ -43,10 +43,8 @@ def filter_veg_dishes(json_data: dict) -> dict:
     {json.dumps(json_data['dishes'], indent=2)}
     """    
 
-    # print('prompt: ', prompt)
-
     # Generate content
-    print("AI is analyzing the menu... this may take a moment.")
+    print("filtering vegetarian dishes... this may take a moment.")
     response = model.generate_content(prompt)
 
     # print('response: ', response)
@@ -62,8 +60,7 @@ def filter_veg_dishes(json_data: dict) -> dict:
     except (json.JSONDecodeError, AttributeError):
         print("Error: Failed to parse JSON from the model's response.")
         print("Raw response:", response.text)
-        raise ValueError("Could not get a valid JSON response from the AI model.")
-
+        return {}
 
 def main():
     """Main function to run the script from the command line."""
