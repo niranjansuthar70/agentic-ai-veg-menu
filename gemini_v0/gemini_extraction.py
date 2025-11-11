@@ -25,30 +25,25 @@ def extract_veg_dishes(img: Image.Image) -> dict:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
     # Set up the model and prompt
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-pro')
 
     prompt = """
-    Analyze the provided restaurant menu image. Your task is to extract ONLY the vegetarian dishes and their corresponding prices.
+    Analyze the provided restaurant menu image. Your task is to extract the dishes and their corresponding prices.
 
     Return the output as a single, valid JSON object. Do not include any text or markdown formatting before or after the JSON block.
 
-    The JSON object should have a single top-level key: "vegetarian_dishes".
-    The value of "vegetarian_dishes" should be an array of objects.
-    Each object in the array should represent a vegetarian dish and have the following two keys:
+    The JSON object should have a single top-level key: "dishes".
+    The value of "dishes" should be an array of objects.
+    Each object in the array should represent a dish and have the following two keys:
     1. "name": The name of the dish (string).
     2. "price": The price of the dish (string).
-    3. "sum": at the end of the array, sum of the prices all vegetarian dishes
-
-    - If a dish is explicitly vegetarian (e.g., "Veg Pulao"), include it.
-    - If an item is a vegetarian component within a non-vegetarian meal (like "Veg Rayta Special" in a "Chicken Thali"), list it. For its price, you can state "Part of Thali".
-    - Do not include any non-vegetarian items like chicken, mutton, or egg dishes.
-    - If there are no vegetarian dishes at all, return an empty array for the "vegetarian_dishes" key.
     """
 
     # Generate content
     print("AI is analyzing the menu... this may take a moment.")
     response = model.generate_content([prompt, img])
-    
+
+    # print('response: ', response)
     # Clean and parse the JSON response
     try:
         json_string = response.text.strip()
@@ -80,13 +75,17 @@ def main():
     try:
         img = Image.open(args.image_path)
         result_data = extract_veg_dishes(img)
-        print("\n--- Extracted Vegetarian Dishes ---")
-        print(json.dumps(result_data, indent=2))
-        print("---------------------------------")
+        # print('result_data: ', result_data)
+        json_string = json.dumps(result_data, indent=2)
+        #--save json to temp folder
+        #--check and create temp folder if not exists
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
+        with open('temp/result.json', 'w') as f:
+            f.write(json_string)    
+        print("JSON saved to temp/result.json")
     except Exception as e:
-        print(f"\nAn error occurred: {e}")
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
-
-# python main.py ././menu1.PNG

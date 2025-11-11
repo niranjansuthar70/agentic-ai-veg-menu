@@ -31,7 +31,7 @@ def process_image_sync(contents: bytes) -> Dict[str, Any]:
 
         return {
             # Use .get() for safety in case a function fails
-            "vegetarian_dishes": image_menu_data.get("vegetarian_dishes"),
+            "vegetarian_dishes": image_menu_data.get("dishes"),
             "sum": image_menu_data.get("sum"),
             "error": None
         }
