@@ -59,23 +59,20 @@ def get_gemini_label(dish_name: str) -> str:
 
 def rag_lookup(dish_name, top_k=2):
     emb = emb_model.encode([dish_name])
-    # print("emb: ", emb)
     D, I = index.search(np.array(emb), top_k)
-    # print("D: ", D)
-    # print("I: ", I)
     results = [kb[i] for i in I[0]]
     return results
 
 def classify_dish(dish_name):
     evidence = rag_lookup(dish_name)
 
-    # Count veg vs non-veg hits (global retrieval signals, not direct match signals)
+    # Count veg vs non-veg hits (global retrieval signals)
     veg_score = sum(1 for e in evidence if e["veg"])
     nonveg_score = sum(1 for e in evidence if not e["veg"])
 
-    print("veg_score: ", veg_score)
-    print("nonveg_score: ", nonveg_score)
-    print("evidence: ", evidence)
+    print("veg_score:", veg_score)
+    print("nonveg_score:", nonveg_score)
+    print("evidence:", evidence)
 
     # ---- RULE 1: Direct match override (strongest signal) ----
     direct_match_nonveg = any(
@@ -84,32 +81,43 @@ def classify_dish(dish_name):
     )
 
     if direct_match_nonveg:
-        is_vegetarian = False
-        confidence = 1.0
-
-    # ---- RULE 2: Scoring fallback (semantic / similarity support) ----
-    elif veg_score + nonveg_score > 0:  # ensures no divide-by-zero
-        is_vegetarian = veg_score > nonveg_score
-        confidence = max(0.3, min(1.0, veg_score / (veg_score + nonveg_score)))
-
-    # ---- RULE 3: Final fallback → LLM Label (weakest / expensive call) ----
-    else:
-        llm_label = get_gemini_label(dish_name)
-        print("llm_label: ", llm_label)
-
-        is_vegetarian = True if llm_label == "veg" else False
-        confidence = 0.4
-
-    #--return only vegetarian dishes
-    if is_vegetarian:
         return {
-            "dish_name": dish_name,
-            "is_vegetarian": is_vegetarian,
-            "confidence": round(confidence, 2),
-            "evidence": evidence[:3]  # include reasoning notes
+            "is_vegetarian": False,
+            "confidence": 1.0,
+            "decision_reason": "Direct dish match indicates non-vegetarian.",
+            "evidence": evidence
         }
-    else:
-        return None
+
+    # ---- RULE 2: Majority Voting (semantic similarity support) ----
+    if veg_score > nonveg_score + 1:
+        # Strong veg majority
+        return {
+            "is_vegetarian": True,
+            "confidence": 0.85,
+            "decision_reason": "Strong majority evidence supports vegetarian.",
+            "evidence": evidence
+        }
+
+    elif nonveg_score > veg_score + 1:
+        # Strong non-veg majority
+        return {
+            "is_vegetarian": False,
+            "confidence": 0.85,
+            "decision_reason": "Strong majority evidence supports non-vegetarian.",
+            "evidence": evidence
+        }
+
+    # ---- RULE 3: Ambiguous Case → fallback to LLM classification ----
+    llm_label = get_gemini_label(dish_name)
+
+    is_vegetarian = (llm_label == "veg")
+
+    return {
+        "is_vegetarian": is_vegetarian,
+        "confidence": 0.4,
+        "decision_reason": "Evidence ambiguous, fallback to LLM label.",
+        "evidence": evidence
+    }
 
 
 #test the classifier

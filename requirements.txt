@@ -13,3 +13,5 @@ google-generativeai
 google
 mcp
 mcp-server
+sentence-transformers
+faiss-cpu

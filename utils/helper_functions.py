@@ -4,8 +4,6 @@ from typing import Dict, Any
 from gemini_v0.gemini_extraction import extract_veg_dishes
 from gemini_v0.veg_dishes_filter import filter_veg_dishes
 
-
-
 def process_image_sync(contents: bytes) -> Dict[str, Any]:
     """
     This SYNCHRONOUS function now contains the conditional logic
