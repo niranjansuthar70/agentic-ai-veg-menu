@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Chapati",
+    "price": "15"
+  },
+  {
+    "name": "Paratha",
+    "price": "20"
+  },
+  {
+    "name": "Pulao",
+    "price": "15"
+  },
+  {
+    "name": "Jwari Bhakar",
+    "price": "20"
+  },
+  {
+    "name": "Bajri Roti",
+    "price": "20"
+  },
+  {
+    "name": "Tandoor Roti",
+    "price": "15"
+  },
+  {
+    "name": "Tandoor Plain Non",
+    "price": "25"
+  },
+  {
+    "name": "Garlic Non",
+    "price": "25"
+  },
+  {
+    "name": "Lachya Paratha",
+    "price": "35"
+  },
+  {
+    "name": "Kulchya Roti",
+    "price": "25"
+  },
+  {
+    "name": "Butter Non",
+    "price": "35"
+  },
+  {
+    "name": "Aloo Paratha",
+    "price": "50"
+  },
+  {
+    "name": "Gobi Paratha",
+    "price": "50"
+  },
+  {
+    "name": "Methi Paratha",
+    "price": "50"
+  },
+  {
+    "name": "Tandoor Masala Roti",
+    "price": "50"
+  },
+  {
+    "name": "Dahi Dhapata",
+    "price": "50"
+  }
+]
