@@ -1,0 +1,8 @@
+[
+    {"item": "paneer tikka", "veg": true, "reason": "Paneer is dairy-based."},
+    {"item": "paratha", "veg": true, "reason": "paratha is a bread made from wheat flour."},
+    {"item": "tofu stir fry", "veg": true, "reason": "Tofu is plant-based."},
+    {"item": "chicken curry", "veg": false, "reason": "Contains poultry."},
+    {"item": "mutton biryani", "veg": false, "reason": "Contains red meat."}
+  ]
+  
