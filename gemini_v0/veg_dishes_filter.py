@@ -3,10 +3,15 @@ import json
 import argparse
 import pathlib
 from PIL import Image
-import google.generativeai as genai
-from dotenv import load_dotenv
+from gemini_v0.load_gemini_model import load_gemini_model
+from utils.logger_setup import get_logger
 
-load_dotenv()
+logger = get_logger(__name__)
+
+logger.debug("loading gemini model in veg_dishes_filter.py")
+gemini_model = load_gemini_model()
+logger.debug("gemini model loaded in veg_dishes_filter.py")
+
 
 def filter_veg_dishes(json_data: dict) -> dict:
     """
@@ -18,14 +23,6 @@ def filter_veg_dishes(json_data: dict) -> dict:
     Returns:
         A dictionary containing the filtered vegetarian dishes.
     """
-    if not os.getenv("GEMINI_API_KEY"):
-        raise EnvironmentError("The 'GEMINI_API_KEY' environment variable is not set.")
-
-    # Configure the Gemini API client
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-
-    # Set up the model and prompt
-    model = genai.GenerativeModel('gemini-2.5-pro')
 
     prompt = f"""
     You are an expert culinary assistant specializing in dietary restrictions.
@@ -45,7 +42,7 @@ def filter_veg_dishes(json_data: dict) -> dict:
 
     # Generate content
     print("filtering vegetarian dishes... this may take a moment.")
-    response = model.generate_content(prompt)
+    response = gemini_model.generate_content(prompt)
 
     # print('response: ', response)
     try:

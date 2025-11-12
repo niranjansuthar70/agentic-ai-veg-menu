@@ -3,33 +3,26 @@ import json
 import argparse
 import pathlib
 from PIL import Image
-import google.generativeai as genai
-from dotenv import load_dotenv
 
-load_dotenv()
+from gemini_v0.load_gemini_model import load_gemini_model
+from utils.logger_setup import get_logger
 
-#---load gemini model from .env file
-gemini_model = os.getenv("gemini_model_id")
-print("gemini_model: ", gemini_model)
+logger = get_logger(__name__)
 
-def extract_veg_dishes(img: Image.Image) -> dict:
+logger.debug("loading gemini model in gemini_extraction.py")
+gemini_model = load_gemini_model()
+logger.debug("gemini model loaded in gemini_extraction.py")
+
+def extract_dishes_with_prices(img: Image.Image) -> dict:
     """
-    Analyzes a menu image using the Gemini API to extract vegetarian dishes.
+    Analyzes a menu image using the Gemini API to extract dishes with prices.
 
     Args:
         image_path: The file path to the menu image.
 
     Returns:
-        A dictionary containing the extracted vegetarian dishes.
+        A dictionary containing the extracted dishes with prices.
     """
-    if not os.getenv("GEMINI_API_KEY"):
-        raise EnvironmentError("The 'GEMINI_API_KEY' environment variable is not set.")
-
-    # Configure the Gemini API client
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-
-    # Set up the model and prompt
-    model = genai.GenerativeModel(gemini_model)
 
     prompt = """
     Analyze the provided restaurant menu image. Your task is to extract the dishes and their corresponding prices.
@@ -44,14 +37,13 @@ def extract_veg_dishes(img: Image.Image) -> dict:
     """
 
     # Generate content
-    print("AI is analyzing the menu... this may take a moment.")
-    response = model.generate_content([prompt, img])
+    logger.debug("AI is analyzing the menu to extract dishes and their prices... this may take a moment.")
+    response = gemini_model.generate_content([prompt, img])
 
-    # print('response: ', response)
-    # Clean and parse the JSON response
+    #---clean and parse the JSON response
     try:
         json_string = response.text.strip()
-        # Remove markdown code block fences if they exist
+        #---remove markdown code block fences if they exist
         if json_string.startswith("```json"):
             json_string = json_string[7:]
         if json_string.endswith("```"):
@@ -59,8 +51,8 @@ def extract_veg_dishes(img: Image.Image) -> dict:
         
         return json.loads(json_string)
     except (json.JSONDecodeError, AttributeError):
-        print("Error: Failed to parse JSON from the model's response.")
-        print("Raw response:", response.text)
+        logger.warning("Error: Failed to parse JSON from the model's response.")
+        logger.debug("Raw response:", response.text)
         return {}
 
 
@@ -78,7 +70,7 @@ def main():
 
     try:
         img = Image.open(args.image_path)
-        result_data = extract_veg_dishes(img)
+        result_data = extract_dishes_with_prices(img)
         json_string = json.dumps(result_data, indent=2)
         #--save json to temp folder
         #--check and create temp folder if not exists

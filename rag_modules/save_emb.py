@@ -2,18 +2,38 @@ from sentence_transformers import SentenceTransformer
 import faiss
 import json
 import numpy as np
+#---load config file
+from utils.load_config import load_config
+#--import logger
+from utils.logger_setup import get_logger
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-print("model loaded")
+logger = get_logger(__name__)
 
-with open("knowledge_base.json") as f:
+#====================================
+#--load config from config.yaml file
+config = load_config()
+#====================================
+emb_model_id=config['emb_model']
+model = SentenceTransformer(emb_model_id)
+logger.debug(f"embedding model :{emb_model_id} loaded successfully..")
+#====================================
+
+#====================================
+json_path=config['knowledge_based_file_name'] + '.json'
+with open(json_path) as f:
     data = json.load(f)
-print("data loaded")
+logger.debug(f"knowledge based json file : {json_path} loaded successfully..")
+#====================================
 
+#====================================
 corpus = [d["item"] for d in data]
 vectors = model.encode(corpus)
 
 index = faiss.IndexFlatL2(vectors.shape[1])
 index.add(np.array(vectors))
+#====================================
 
-faiss.write_index(index, "knowledge_base.index")
+#====================================
+index_file_path=config['knowledge_based_file_name'] + '.index'
+faiss.write_index(index, index_file_path)
+#====================================

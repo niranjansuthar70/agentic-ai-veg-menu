@@ -1,31 +1,41 @@
 from mcp.server.fastmcp import FastMCP
 from typing import Any
 from decimal import Decimal, InvalidOperation
+from utils.logger_setup import get_logger
+
+logger = get_logger(__name__)
 
 mcp = FastMCP("Demo-Server", stateless_http=True)
 
 @mcp.tool(
-    description="Calculate the total price of vegetarian dishes. Each dish must include a 'price' field."
+    description="Classifya veg dishes and calculate the total price of vegetarian dishes. Each dish must include a 'price' field."
 )
-def sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
-    if not dishes:
-        return {"error": "No dishes were provided."}
-
+def classify_sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
+    
     total = Decimal('0')
+    
+    if not dishes:
+        return {}
 
-    print("dishes: ", dishes)
-    print("type of dishes: ", type(dishes))
+    #--log input inside MCP tool
+    logger.debug(f'dishes inside MCP : {dishes} and type : {type(dishes)}')
 
-    for dish in dishes:
-        name = dish.get("name", "unknown")
+    #--STEP 1 -> perform classification
+    
 
-        if "price" not in dish:
-            return {"error": f"Dish '{name}' is missing required field 'price'."}
 
-        try:
-            total += Decimal(str(dish["price"]))
-        except (InvalidOperation, TypeError):
-            return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
+
+
+    # for dish in dishes:
+    #     name = dish.get("name", "unknown")
+
+    #     if "price" not in dish:
+    #         return {"error": f"Dish '{name}' is missing required field 'price'."}
+
+    #     try:
+    #         total += Decimal(str(dish["price"]))
+    #     except (InvalidOperation, TypeError):
+    #         return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
 
     return {"total_price": float(total)}
 

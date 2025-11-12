@@ -1,36 +1,32 @@
 from PIL import Image
 import io
 from typing import Dict, Any
-from gemini_v0.gemini_extraction import extract_veg_dishes
+from gemini_v0.gemini_extraction import extract_dishes_with_prices
 from gemini_v0.veg_dishes_filter import filter_veg_dishes
+from utils.logger_setup import get_logger
+
+logger = get_logger(__name__)
 
 def process_image_sync(contents: bytes) -> Dict[str, Any]:
-    """
-    This SYNCHRONOUS function now contains the conditional logic
-    based on the 'method' argument.
-    """
     try:
         pil_image = Image.open(io.BytesIO(contents))
-        
         image_menu_data: Dict[str, Any] = {}
 
         try:
-            print('extracting vegetarian dishes with gemini')
-            # This is assumed to be a blocking call
-            image_menu_data = extract_veg_dishes(pil_image)
+            logger.debug("Extracting dishes with prices from image using Gemini...")
+            image_menu_data = extract_dishes_with_prices(pil_image)
         except Exception as e:
-            print(f"Error extracting vegetarian dishes with gemini: {e}")
+            logger.warning(f"Error extracting dishes with prices: {e}", exc_info=True)
             return {}
 
         return image_menu_data
     except Exception as e:
-        print(f"Error processing image: {e}")
+        logger.warning(f"Error processing image: {e}", exc_info=True)
         return {}
 
 def filter_vegetarian_dishes(results: dict) -> dict:
-    """
-    Filter vegetarian dishes from the results.
-    """
     if results:
+        logger.debug("Filtering vegetarian dishes...")
         return filter_veg_dishes(results)
+    logger.warning("No results found to filter.")
     return {}
