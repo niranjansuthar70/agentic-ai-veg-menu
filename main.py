@@ -1,3 +1,6 @@
+#===main file to run service to perform veg dishes detection given input images
+
+#=====================================================================
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from typing import List, Optional, Dict, Any, Set
 import os
@@ -31,9 +34,9 @@ logger.debug(f"mcp_url: {mcp_url}")
 logger.debug("--------------------------------")
 #====================================
 
-#====================================
+# #====================================
 app = FastAPI(title="Process restaurant menu image and return vegetarian dishes and total price")
-#====================================
+# #====================================
 
 #====================================
 @app.post("/process-images")
@@ -82,62 +85,18 @@ async def process_images(
                     veg_dishes_prices_list = await session.call_tool("classify_sum_veg_prices", {"dishes": [dish_prices_list]})
                     veg_dishes_prices_list = veg_dishes_prices_list.content[0].text
                     logger.debug(f"veg_dishes_prices_list: {veg_dishes_prices_list} and type : {type(veg_dishes_prices_list)}")
-                    # print("Text:", text)
                     # #--convert to json dict
                     veg_dishes_prices_list = json.loads(veg_dishes_prices_list)
                     logger.debug(f"veg_dishes_prices_list after json loading : {veg_dishes_prices_list} and type : {type(veg_dishes_prices_list)}")
-                    # print("total_price_dict: ", total_price_dict)
-                    # print("type of total_price_dict: ", type(total_price_dict))
-                    # total_price = total_price_dict.get("total_price", 0)
-                    # print("total_price: ", total_price)
-                    # print("type of total_price: ", type(total_price))
         else:
             logger.debug(f"no dish_prices_list to filter vegetarian dishes")
-            vegetarian_dishes = []
+            veg_dishes_prices_list = []
 
-        # logger.debug("--------------------------------")
-        # #--save vegetarian_dishes to json in temp folder
-        # with open('temp/vegetarian_dishes.json', 'w') as f:
-        #     json.dump(vegetarian_dishes, f)
-        # logger.debug("vegetarian_dishes saved to temp/vegetarian_dishes.json")
-        # logger.debug("--------------------------------")
-
-#         # # #--check if temp/vegetarian_dishes.json exists
-#         # with open('temp/vegetarian_dishes.json', 'r') as f:
-#         #     vegetarian_dishes = json.load(f)
-#         #--STEP 3 -> call MCP tool to calculate total price of vegetarian dishes
-#         # #---call MCP tool to calculate total price of vegetarian dishes
-#         print("vegetarian_dishes: ", vegetarian_dishes)
-#         print("type of vegetarian_dishes: ", type(vegetarian_dishes))
-#         print("--------------------------------")
-#         if vegetarian_dishes:
-#             async with streamablehttp_client(mcp_url) as (read, write, get_session_id):
-#                 async with ClientSession(read, write) as session:
-#                     await session.initialize()   
-#                     print("session initialized")
-#                     result = await session.call_tool("sum_veg_prices", {"dishes": vegetarian_dishes})
-#                     print("result: ", result, "type: ", type(result))
-#                     text = result.content[0].text
-#                     print("Text:", text)
-#                     #--convert to json dict
-#                     total_price_dict = json.loads(text)
-#                     print("total_price_dict: ", total_price_dict)
-#                     print("type of total_price_dict: ", type(total_price_dict))
-#                     total_price = total_price_dict.get("total_price", 0)
-#                     print("total_price: ", total_price)
-#                     print("type of total_price: ", type(total_price))
-
-#         else:
-#             print("no vegetarian dishes to calculate total price")
-#             print("--------------------------------")
-#             total_price = 0 
-
-        
         return veg_dishes_prices_list
         
-
-# uvicorn main:app --reload --port 9000
-# python -m rag_modules.save_emb
-# python -m mcp_modules.server
-# if __name__ == "__main__":
-#     uvicorn.run(app, port=config["main_port"])
+# #==commands to run project
+# # uvicorn main:app --reload --port 9000
+# # python -m rag_modules.save_emb
+# # python -m mcp_modules.server
+# # if __name__ == "__main__":
+# #     uvicorn.run(app, port=config["main_port"])

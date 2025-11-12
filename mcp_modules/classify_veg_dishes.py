@@ -8,7 +8,9 @@ import argparse
 import pathlib
 from PIL import Image
 from typing import Any
-from gemini_v0.load_gemini_model import load_gemini_model
+# from gemini_v0.load_gemini_model import load_gemini_model
+from model_instances import gemini_model_instance
+
 
 #---load config file
 from utils.load_config import load_config
@@ -16,7 +18,9 @@ from utils.load_config import load_config
 from utils.logger_setup import get_logger
 logger = get_logger(__name__)
 
-gemini_model = load_gemini_model()
+logger.debug("calling gemini model in classify_veg_dishes.py")
+gemini_model = gemini_model_instance
+logger.debug("gemini model called in classify_veg_dishes.py")
 #====================================
 #--load config from config.yaml file
 config = load_config()
@@ -141,6 +145,7 @@ def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
 
     for dish in dishes[0]['dishes']:
         dish_name=dish['name']
+        dish_price = float(dish.get('price', 0) or 0)
         logger.debug(f'checking for dish : {dish_name}')
         dish_classify_result=classify_single_dish(dish_name=dish_name)
         logger.debug(f'dish_classify_result: {dish_classify_result}')
@@ -149,6 +154,7 @@ def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
         if dish_classify_result['is_vegetarian']:
             logger.debug(f'veg dish found...appending to classification_result')
             dish_classify_result['dish_name']=dish_name
+            dish_classify_result['dish_price']=dish_price
             classification_result.append(dish_classify_result)
 
     return classification_result

@@ -4,14 +4,15 @@ import argparse
 import pathlib
 from PIL import Image
 
-from gemini_v0.load_gemini_model import load_gemini_model
+# from gemini_v0.load_gemini_model import load_gemini_model
+from model_instances import gemini_model_instance
 from utils.logger_setup import get_logger
 
 logger = get_logger(__name__)
 
-logger.debug("loading gemini model in gemini_extraction.py")
-gemini_model = load_gemini_model()
-logger.debug("gemini model loaded in gemini_extraction.py")
+logger.debug("calling gemini model in gemini_extraction.py")
+gemini_model = gemini_model_instance
+logger.debug("gemini model called in gemini_extraction.py")
 
 def extract_dishes_with_prices(img: Image.Image) -> dict:
     """
@@ -56,31 +57,31 @@ def extract_dishes_with_prices(img: Image.Image) -> dict:
         return {}
 
 
-def main():
-    """Main function to run the script from the command line."""
-    parser = argparse.ArgumentParser(
-        description="Extract vegetarian dishes and prices from a menu image using AI."
-    )
-    parser.add_argument(
-        "image_path",
-        type=pathlib.Path,
-        help="The path to the menu image file (e.g., menu.jpg)."
-    )
-    args = parser.parse_args()
+# def main():
+#     """Main function to run the script from the command line."""
+#     parser = argparse.ArgumentParser(
+#         description="Extract vegetarian dishes and prices from a menu image using AI."
+#     )
+#     parser.add_argument(
+#         "image_path",
+#         type=pathlib.Path,
+#         help="The path to the menu image file (e.g., menu.jpg)."
+#     )
+#     args = parser.parse_args()
 
-    try:
-        img = Image.open(args.image_path)
-        result_data = extract_dishes_with_prices(img)
-        json_string = json.dumps(result_data, indent=2)
-        #--save json to temp folder
-        #--check and create temp folder if not exists
-        if not os.path.exists('temp'):
-            os.makedirs('temp')
-        with open('temp/result.json', 'w') as f:
-            f.write(json_string)    
-        print("JSON saved to temp/result.json")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+#     try:
+#         img = Image.open(args.image_path)
+#         result_data = extract_dishes_with_prices(img)
+#         json_string = json.dumps(result_data, indent=2)
+#         #--save json to temp folder
+#         #--check and create temp folder if not exists
+#         if not os.path.exists('temp'):
+#             os.makedirs('temp')
+#         with open('temp/result.json', 'w') as f:
+#             f.write(json_string)    
+#         print("JSON saved to temp/result.json")
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

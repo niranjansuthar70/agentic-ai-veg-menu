@@ -15,32 +15,23 @@ def classify_sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
     
     logger.debug(f'dishes inside MCP : {dishes} and type : {type(dishes)}')
     
-    total = Decimal('0')
+    total_price = float(0)
     
     if not dishes:
         return {}
-
-    #--log input inside MCP tool
 
     #--STEP 1 -> perform classification
     classification_output_list=classify_dishes(dishes=dishes)
     logger.debug(f'classification_output_list inside MCP : {classification_output_list} and type : {type(classification_output_list)}')
 
-
-    # for dish in dishes:
-    #     name = dish.get("name", "unknown")
-
-    #     if "price" not in dish:
-    #         return {"error": f"Dish '{name}' is missing required field 'price'."}
-
-    #     try:
-    #         total += Decimal(str(dish["price"]))
-    #     except (InvalidOperation, TypeError):
-    #         return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
+    #--get sum of all prices
+    if classification_output_list:
+        for sample_dish_items in classification_output_list:
+            total_price+=sample_dish_items['dish_price']
 
     return {
         'dishes':classification_output_list,
-        "total_price": float(total)
+        "total_price": float(total_price)
         }
 
 
