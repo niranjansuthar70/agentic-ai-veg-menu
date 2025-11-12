@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  restapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: restapi
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - ENV=development
+      - MCP_URL=http://mcp-server:8000
+    depends_on:
+      - mcp-server
+    volumes:
+      - ./restapi:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  mcp-server:
+    build:
+      context: .         # ✅ Fix: build only from mcp_modules
+      dockerfile: Dockerfile
+    container_name: mcp-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+    volumes:
+      - ./mcp_modules:/app           # ✅ dev mount (optional)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  default:
+    name: vegmenu_network
