@@ -57,16 +57,16 @@ async def process_images(
     for image in images:
         contents = await image.read()
         
-        # #--STEP 1 -> pass image to gemini and get all dishes with prices
-        # dish_prices_list=process_image_sync(contents)
-        # #--save to json in temp folder
-        # #--check and create temp folder if not exists
-        # if not os.path.exists('temp'):
-        #     os.makedirs('temp')
-        # with open('temp/dish_prices_list.json', 'w') as f:
-        #     json.dump(dish_prices_list, f)
-        # logger.debug(f"dish_prices_list: {dish_prices_list}")
-        # logger.debug(f"type of dish_prices_list: {type(dish_prices_list)}")
+        #--STEP 1 -> pass image to gemini and get all dishes with prices
+        dish_prices_list=process_image_sync(contents)
+        #--save to json in temp folder
+        #--check and create temp folder if not exists
+        if not os.path.exists('temp'):
+            os.makedirs('temp')
+        with open('temp/dish_prices_list.json', 'w') as f:
+            json.dump(dish_prices_list, f)
+        logger.debug(f"dish_prices_list: {dish_prices_list}")
+        logger.debug(f"type of dish_prices_list: {type(dish_prices_list)}")
 
         # ===for local testing -> no need to call gemini again and again
         with open('temp/dish_prices_list.json', 'r') as f:
