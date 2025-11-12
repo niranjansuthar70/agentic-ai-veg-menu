@@ -14,3 +14,15 @@ venv/
 .mypy_cache/
 node_modules/
 __MACOSX
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.git
+.gitignore
+.mypy_cache/
+data/
+models/
+

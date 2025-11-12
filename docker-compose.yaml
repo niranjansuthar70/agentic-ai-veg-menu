@@ -8,14 +8,14 @@ services:
     container_name: restapi
     restart: unless-stopped
     ports:
-      - "9000:9000"                      # host:container (FastAPI app)
+      - "9000:9000"
     environment:
       - ENV=development
-      - MCP_URL=http://mcp-server:8000   # IMPORTANT: points to mcp service by name
+      - MCP_URL=http://mcp-server:8000
     depends_on:
       - mcp-server
     volumes:
-      - ./restapi:/app                   # dev mount (hot reload). Remove in prod.
+      - ./restapi:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/ || exit 1"]
       interval: 10s
@@ -24,16 +24,16 @@ services:
 
   mcp-server:
     build:
-      context: .
-      dockerfile: mcp_modules/Dockerfile
+      context: .         # ✅ Fix: build only from mcp_modules
+      dockerfile: Dockerfile
     container_name: mcp-server
     restart: unless-stopped
     ports:
-      - "8000:8000"                      # streamable-http transport exposed here
+      - "8000:8000"
     environment:
       - ENV=development
     volumes:
-      - ./mcp_modules:/app                # dev mount
+      - ./mcp_modules:/app           # ✅ dev mount (optional)
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/ || exit 1"]
       interval: 10s
