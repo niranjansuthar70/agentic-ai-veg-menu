@@ -2,6 +2,7 @@ from mcp.server.fastmcp import FastMCP
 from typing import Any
 from decimal import Decimal, InvalidOperation
 from utils.logger_setup import get_logger
+from mcp_modules.classify_veg_dishes import classify_dishes
 
 logger = get_logger(__name__)
 
@@ -12,18 +13,18 @@ mcp = FastMCP("Demo-Server", stateless_http=True)
 )
 def classify_sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
     
+    logger.debug(f'dishes inside MCP : {dishes} and type : {type(dishes)}')
+    
     total = Decimal('0')
     
     if not dishes:
         return {}
 
     #--log input inside MCP tool
-    logger.debug(f'dishes inside MCP : {dishes} and type : {type(dishes)}')
 
     #--STEP 1 -> perform classification
-    
-
-
+    classification_output_list=classify_dishes(dishes=dishes)
+    logger.debug(f'classification_output_list inside MCP : {classification_output_list} and type : {type(classification_output_list)}')
 
 
     # for dish in dishes:
@@ -37,7 +38,10 @@ def classify_sum_veg_prices(dishes: list[dict[str, Any]]) -> dict[str, Any]:
     #     except (InvalidOperation, TypeError):
     #         return {"error": f"Invalid price value for dish '{name}': {dish['price']}"}
 
-    return {"total_price": float(total)}
+    return {
+        'dishes':classification_output_list,
+        "total_price": float(total)
+        }
 
 
 if __name__ == "__main__":

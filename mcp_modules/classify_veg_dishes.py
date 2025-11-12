@@ -7,22 +7,41 @@ import json
 import argparse
 import pathlib
 from PIL import Image
-import google.generativeai as genai
-from dotenv import load_dotenv
+from typing import Any
+from gemini_v0.load_gemini_model import load_gemini_model
 
-emb_model = SentenceTransformer("all-MiniLM-L6-v2")
-index = faiss.read_index("knowledge_base.index")
+#---load config file
+from utils.load_config import load_config
+#--import logger
+from utils.logger_setup import get_logger
+logger = get_logger(__name__)
 
-with open("knowledge_base.json") as f:
+gemini_model = load_gemini_model()
+#====================================
+#--load config from config.yaml file
+config = load_config()
+#====================================
+emb_model_id=config['emb_model']
+emb_model = SentenceTransformer(emb_model_id)
+logger.debug(f"embedding model :{emb_model_id} loaded successfully..")
+#====================================
+#--loading embedding model
+index_file_path='rag_modules/' + config['knowledge_based_file_name'] + '.index'
+index = faiss.read_index(index_file_path)
+
+json_path='rag_modules/' + config['knowledge_based_file_name'] + '.json'
+with open(json_path) as f:
     kb = json.load(f)
 
-load_dotenv()
-if not os.getenv("GEMINI_API_KEY"):
-        raise EnvironmentError("The 'GEMINI_API_KEY' environment variable is not set.")
+#====================================
+def rag_lookup(dish_name, top_k=2):
+    emb = emb_model.encode([dish_name])
+    D, I = index.search(np.array(emb), top_k)
+    results = [kb[i] for i in I[0]]
+    return results
+#====================================
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-gemini_model = genai.GenerativeModel('gemini-2.5-flash')
-
+#====================================
 def get_gemini_label(dish_name: str) -> str:
     """
     Classifies a dish as vegetarian or non-vegetarian using the Gemini API.
@@ -56,23 +75,19 @@ def get_gemini_label(dish_name: str) -> str:
 
     # Safety: normalize unexpected outputs
     return "veg" if label.startswith("veg") else "non_veg"
+#====================================
 
-def rag_lookup(dish_name, top_k=2):
-    emb = emb_model.encode([dish_name])
-    D, I = index.search(np.array(emb), top_k)
-    results = [kb[i] for i in I[0]]
-    return results
-
-def classify_dish(dish_name):
+#====================================
+def classify_single_dish(dish_name):
     evidence = rag_lookup(dish_name)
 
     # Count veg vs non-veg hits (global retrieval signals)
     veg_score = sum(1 for e in evidence if e["veg"])
     nonveg_score = sum(1 for e in evidence if not e["veg"])
 
-    print("veg_score:", veg_score)
-    print("nonveg_score:", nonveg_score)
-    print("evidence:", evidence)
+    logger.debug(f"veg_score :{veg_score}")
+    logger.debug(f"nonveg_score :{nonveg_score}")
+    logger.debug(f"evidence :{evidence}")
 
     # ---- RULE 1: Direct match override (strongest signal) ----
     direct_match_nonveg = any(
@@ -120,14 +135,15 @@ def classify_dish(dish_name):
     }
 
 
-#test the classifier
-sample_data={"dishes": [{"name": "Chiken Curry", "price": "140"}, {"name": "Chiken Masala", "price": "150"}, {"name": "Boti", "price": "120"}, {"name": "Boti fry", "price": "130"}, {"name": "Chapati", "price": "15"}, {"name": "Paratha", "price": "20"}]}
+def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
+    logger.debug(f'reached inside -> classify_dishes')
+    classification_result=[]
 
-sample_data_list=sample_data["dishes"]
+    for dish in dishes[0]['dishes']:
+        dish_name=dish['name']
+        logger.debug(f'checking for dish : {dish_name}')
+        dish_classify_result=classify_single_dish(dish_name=dish_name)
+        dish_classify_result['dish_name']=dish_name
+        classification_result.append(dish_classify_result)
 
-for dish in sample_data_list:
-    dish_name = dish["name"]
-    print("dish_name: ", dish_name)
-    result = classify_dish(dish_name)
-    print("result: ", result)
-    print("--------------------------------")
+    return classification_result

@@ -24,9 +24,9 @@ def process_image_sync(contents: bytes) -> Dict[str, Any]:
         logger.warning(f"Error processing image: {e}", exc_info=True)
         return {}
 
-def filter_vegetarian_dishes(results: dict) -> dict:
-    if results:
-        logger.debug("Filtering vegetarian dishes...")
-        return filter_veg_dishes(results)
-    logger.warning("No results found to filter.")
-    return {}
+# def filter_vegetarian_dishes(results: dict) -> dict:
+#     if results:
+#         logger.debug("Filtering vegetarian dishes...")
+#         return filter_veg_dishes(results)
+#     logger.warning("No results found to filter.")
+#     return {}
