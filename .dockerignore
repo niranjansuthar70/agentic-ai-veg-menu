@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.git
+.gitignore
+.vscode
+__init__.py
+venv/
+.env/
+*.egg-info
+.mypy_cache/
+node_modules/
+__MACOSX

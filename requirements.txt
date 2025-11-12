@@ -6,9 +6,9 @@ transformers
 torch
 huggingface_hub 
 python-dotenv
-accelerate
-bitsandbytes
-torchvision
+# accelerate
+# bitsandbytes
+# torchvision
 google-generativeai
 google
 mcp
