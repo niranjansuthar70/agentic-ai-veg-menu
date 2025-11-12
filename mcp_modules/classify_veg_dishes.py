@@ -143,7 +143,12 @@ def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
         dish_name=dish['name']
         logger.debug(f'checking for dish : {dish_name}')
         dish_classify_result=classify_single_dish(dish_name=dish_name)
-        dish_classify_result['dish_name']=dish_name
-        classification_result.append(dish_classify_result)
+        logger.debug(f'dish_classify_result: {dish_classify_result}')
+
+        #--process only if vegetarin dish found
+        if dish_classify_result['is_vegetarian']:
+            logger.debug(f'veg dish found...appending to classification_result')
+            dish_classify_result['dish_name']=dish_name
+            classification_result.append(dish_classify_result)
 
     return classification_result

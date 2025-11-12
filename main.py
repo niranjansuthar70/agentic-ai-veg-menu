@@ -80,11 +80,12 @@ async def process_images(
                     await session.initialize()   
                     logger.debug("session initialized")
                     veg_dishes_prices_list = await session.call_tool("classify_sum_veg_prices", {"dishes": [dish_prices_list]})
+                    veg_dishes_prices_list = veg_dishes_prices_list.content[0].text
                     logger.debug(f"veg_dishes_prices_list: {veg_dishes_prices_list} and type : {type(veg_dishes_prices_list)}")
-                    # text = result.content[0].text
                     # print("Text:", text)
                     # #--convert to json dict
-                    # total_price_dict = json.loads(text)
+                    veg_dishes_prices_list = json.loads(veg_dishes_prices_list)
+                    logger.debug(f"veg_dishes_prices_list after json loading : {veg_dishes_prices_list} and type : {type(veg_dishes_prices_list)}")
                     # print("total_price_dict: ", total_price_dict)
                     # print("type of total_price_dict: ", type(total_price_dict))
                     # total_price = total_price_dict.get("total_price", 0)
@@ -92,7 +93,7 @@ async def process_images(
                     # print("type of total_price: ", type(total_price))
         else:
             logger.debug(f"no dish_prices_list to filter vegetarian dishes")
-            vegetarian_dishes = {}
+            vegetarian_dishes = []
 
         # logger.debug("--------------------------------")
         # #--save vegetarian_dishes to json in temp folder
@@ -132,12 +133,8 @@ async def process_images(
 #             total_price = 0 
 
         
-#         results={
-#             "vegetarian_dishes": vegetarian_dishes,
-#             "total_price": total_price
-#         }
+        return veg_dishes_prices_list
         
-#         return results
 
 # uvicorn main:app --reload --port 9000
 # python -m rag_modules.save_emb
