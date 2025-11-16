@@ -8,12 +8,20 @@ from PIL import Image
 from model_instances import gemini_model_instance
 from utils.logger_setup import get_logger
 
+# --- LANGSMITH: Step 1: Import tracing components ---
+from langsmith import traceable
+# from langsmith.run_trees import add_metadata # <-- CORRECT
+
 logger = get_logger(__name__)
 
 logger.debug("calling gemini model in gemini_extraction.py")
 gemini_model = gemini_model_instance
 logger.debug("gemini model called in gemini_extraction.py")
 
+# --- LANGSMITH: Step 2: Add the decorator ---
+# This tells LangSmith to trace this function as an "llm" call,
+# which automatically tracks inputs, outputs, tokens, and latency.
+@traceable(name="Gemini Vision Extraction", run_type="llm")
 def extract_dishes_with_prices(img: Image.Image) -> dict:
     """
     Analyzes a menu image using the Gemini API to extract dishes with prices.
@@ -37,8 +45,18 @@ def extract_dishes_with_prices(img: Image.Image) -> dict:
     2. "price": The price of the dish (string).
     """
 
+    # --- LANGSMITH: Step 3: (Optional but recommended) Add model metadata ---
+    # This helps LangSmith correctly identify the model for cost tracking.
+    # We access the 'model_name' attribute from the GenerativeModel instance.
+    # try:
+    #     add_metadata({"model_name": gemini_model.model_name})
+    # except Exception as e:
+    #     logger.warning(f"Could not log LangSmith metadata: {e}")
+
     # Generate content
     logger.debug("AI is analyzing the menu to extract dishes and their prices... this may take a moment.")
+    
+    # --- LANGSMITH: Step 4: This call is now traced ---
     response = gemini_model.generate_content([prompt, img])
 
     #---clean and parse the JSON response
@@ -50,13 +68,21 @@ def extract_dishes_with_prices(img: Image.Image) -> dict:
         if json_string.endswith("```"):
             json_string = json_string[:-3]
         
-        return json.loads(json_string)
+        parsed_json = json.loads(json_string)
+        
+        # The 'response' object is automatically logged as the output,
+        # but you could also explicitly log the parsed JSON.
+        # This function's return value is logged as the final output.
+        return parsed_json
+        
     except (json.JSONDecodeError, AttributeError):
         logger.warning("Error: Failed to parse JSON from the model's response.")
-        logger.debug("Raw response:", response.text)
+        logger.debug(f"Raw response: {response.text}")
+        # Return an empty dict on failure
         return {}
 
 
+# (The main function remains unchanged, it will work as before)
 # def main():
 #     """Main function to run the script from the command line."""
 #     parser = argparse.ArgumentParser(

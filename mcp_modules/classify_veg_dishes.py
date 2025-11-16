@@ -16,6 +16,11 @@ from model_instances import gemini_model_instance
 from utils.load_config import load_config
 #--import logger
 from utils.logger_setup import get_logger
+
+# --- LANGSMITH: Step 1: Import tracing components ---
+from langsmith import traceable
+# from langsmith.run_trees import add_metadata # <-- CORRECT
+
 logger = get_logger(__name__)
 
 logger.debug("calling gemini model in classify_veg_dishes.py")
@@ -38,14 +43,20 @@ with open(json_path) as f:
     kb = json.load(f)
 
 #====================================
+# --- LANGSMITH: Step 2: Trace the RAG retriever ---
+@traceable(name="RAG Lookup", run_type="retriever")
 def rag_lookup(dish_name, top_k=2):
     emb = emb_model.encode([dish_name])
     D, I = index.search(np.array(emb), top_k)
     results = [kb[i] for i in I[0]]
+    # The return value 'results' will be automatically logged as the
+    # 'documents' output of this retriever step.
     return results
 #====================================
 
 #====================================
+# --- LANGSMITH: Step 3: Trace the fallback LLM call ---
+@traceable(name="Gemini Classifier", run_type="llm")
 def get_gemini_label(dish_name: str) -> str:
     """
     Classifies a dish as vegetarian or non-vegetarian using the Gemini API.
@@ -56,6 +67,12 @@ def get_gemini_label(dish_name: str) -> str:
     Returns:
         "veg" or "non_veg"
     """
+
+    # --- LANGSMITH: Add model metadata for cost/token tracking ---
+    # try:
+    #     add_metadata({"model_name": gemini_model.model_name})
+    # except Exception as e:
+    #     logger.warning(f"Could not log LangSmith metadata: {e}")
 
     prompt = f"""
     You are a strict vegetarian classification assistant.
@@ -82,7 +99,10 @@ def get_gemini_label(dish_name: str) -> str:
 #====================================
 
 #====================================
+# --- LANGSMITH: Step 4: Trace the core business logic ---
+@traceable(name="Classify Single Dish")
 def classify_single_dish(dish_name):
+    # This will now appear as a nested 'RAG Lookup' span
     evidence = rag_lookup(dish_name)
 
     # Count veg vs non-veg hits (global retrieval signals)
@@ -92,6 +112,9 @@ def classify_single_dish(dish_name):
     logger.debug(f"veg_score :{veg_score}")
     logger.debug(f"nonveg_score :{nonveg_score}")
     logger.debug(f"evidence :{evidence}")
+    
+    # (Note: You could use 'run.log(metadata=...)' here to log scores,
+    # but the full return value is logged automatically anyway)
 
     # ---- RULE 1: Direct match override (strongest signal) ----
     direct_match_nonveg = any(
@@ -127,6 +150,9 @@ def classify_single_dish(dish_name):
         }
 
     # ---- RULE 3: Ambiguous Case → fallback to LLM classification ----
+    
+    # This will now create a nested 'Gemini Classifier' LLM span
+    # *only* when this fallback rule is triggered.
     llm_label = get_gemini_label(dish_name)
 
     is_vegetarian = (llm_label == "veg")
@@ -138,7 +164,8 @@ def classify_single_dish(dish_name):
         "evidence": evidence
     }
 
-
+# --- LANGSMITH: Step 5: Trace the main entrypoint function ---
+@traceable(name="Classify All Dishes")
 def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
     logger.debug(f'reached inside -> classify_dishes')
     classification_result=[]
@@ -147,6 +174,9 @@ def classify_dishes(dishes: list[dict[str, Any]]) -> dict[str, Any]:
         dish_name=dish['name']
         dish_price = float(dish.get('price', 0) or 0)
         logger.debug(f'checking for dish : {dish_name}')
+        
+        # This will now create a new 'Classify Single Dish' span
+        # for every single dish in the loop.
         dish_classify_result=classify_single_dish(dish_name=dish_name)
         logger.debug(f'dish_classify_result: {dish_classify_result}')
 

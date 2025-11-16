@@ -1,6 +1,6 @@
 MAX_IMAGES: 1 #--maximum number of images we can upload -> currently performing for 1
 mcp_url: "http://127.0.0.1:8000/mcp" #---url for local MCP
-# gemini_model_id: "gemini-2.5-pro" #--gemini model id
+gemini_model_id: "gemini-2.5-pro" #--gemini model id
 gemini_model_id: "gemini-2.5-flash" #--gemini model id
 main_port: 9000 #---port id for main file
 emb_model: 'all-MiniLM-L6-v2' #--embedding model id to store vector embedding of dishes/ingredients
