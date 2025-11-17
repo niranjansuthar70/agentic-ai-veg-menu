@@ -100,3 +100,4 @@ async def process_images(
 # # python -m mcp_modules.server
 # # if __name__ == "__main__":
 # #     uvicorn.run(app, port=config["main_port"])
+# python -m nanonets_ocr.test_ocr

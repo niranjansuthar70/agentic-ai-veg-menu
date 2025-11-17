@@ -1,0 +1,157 @@
+{
+  "menu_categories": [
+    {
+      "category": "Non-Veg Dishes",
+      "items": [
+        {
+          "dish_name": "Chicken Masala",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 120,
+            "half": 225,
+            "full": 450
+          }
+        },
+        {
+          "dish_name": "Butter Chicken",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 130,
+            "half": 250,
+            "full": 500
+          }
+        },
+        {
+          "dish_name": "Kadhai Chicken",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 130,
+            "half": 250,
+            "full": 500
+          }
+        },
+        {
+          "dish_name": "Matka Chicken",
+          "pricing_type": "fixed",
+          "prices": {
+            "full": 520
+          }
+        },
+        {
+          "dish_name": "Matka Mutton Masala",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 230,
+            "half": 450,
+            "full": 800
+          }
+        },
+        {
+          "dish_name": "Mutton Rogan Josh",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 230,
+            "half": 450,
+            "full": 800
+          }
+        },
+        {
+          "dish_name": "Egg Curry",
+          "pricing_type": "fixed",
+          "prices": {
+            "full": 90
+          }
+        },
+        {
+          "dish_name": "Hydrabadi Chicken",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 130,
+            "half": 250,
+            "full": 500
+          }
+        },
+        {
+          "dish_name": "Chicken Fried",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 110,
+            "half": 210,
+            "full": 410
+          }
+        }
+      ]
+    },
+    {
+      "category": "Chinese Non-Veg Dishes",
+      "items": [
+        {
+          "dish_name": "Chicken Chowmin",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 120
+          }
+        },
+        {
+          "dish_name": "Chicken Fried Rice",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 120
+          }
+        },
+        {
+          "dish_name": "Chicken Chilli (10 Cubes)",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 160
+          }
+        },
+        {
+          "dish_name": "Egg Chilli (8 Cubes)",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 100
+          }
+        }
+      ]
+    },
+    {
+      "category": "Non-Veg Fried",
+      "items": [
+        {
+          "dish_name": "Chicken Fried Special",
+          "pricing_type": "variable",
+          "prices": {
+            "quarter": 135,
+            "half": 260,
+            "full": 500
+          }
+        }
+      ]
+    },
+    {
+      "category": "Haven Special Chicken Thali",
+      "items": [
+        {
+          "dish_name": "Haven Special Chicken Thali",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 180
+          }
+        }
+      ]
+    },
+    {
+      "category": "Haven Special Egg Thali",
+      "items": [
+        {
+          "dish_name": "Haven Special Egg Thali",
+          "pricing_type": "fixed",
+          "prices": {
+            "standard": 100
+          }
+        }
+      ]
+    }
+  ]
+}
